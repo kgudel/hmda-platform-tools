@@ -25,6 +25,7 @@ const parseDate = date => {
 
 const getNumericAPR = apr => {
   if (apr.match(/%$/)) apr = apr.slice(0, -1)
+  if (apr === '') return NaN
   return +apr
 }
 
@@ -59,7 +60,6 @@ const validatedInput = {
 class Form extends Component {
   constructor(props) {
     super(props)
-
     this.state = defaultState
     this.handleFormSubmit = this.handleFormSubmit.bind(this)
     this.actionTakenHandler = this.makeChangeHandler('actionTaken')
@@ -112,6 +112,20 @@ class Form extends Component {
     })
   }
 
+  validateAllInput(cb) {
+    const newState = {}
+    const validated = ['rateSetDate', 'APR', 'loanTerm']
+    validated.forEach(v => {
+      newState[v] = validatedInput[v].validate(this.state[v])
+    })
+    this.setState(
+      {
+        validationErrors: newState
+      },
+      cb
+    )
+  }
+
   makeValidator(target) {
     return event => this.setError(target, event)
   }
@@ -119,9 +133,14 @@ class Form extends Component {
   handleFormSubmit(event) {
     event.preventDefault()
 
-    const API_URL = 'https://ffiec-api.cfpb.gov/public/rateSpread'
-    this.runFetch(API_URL, this.prepareBodyFromState()).then(res => {
-      this.props.onCalculated(res)
+    this.validateAllInput(() => {
+      const errs = this.state.validationErrors
+      if (errs.rateSetDate || errs.APR || errs.loanTerm) return
+
+      const API_URL = 'https://ffiec-api.cfpb.gov/public/rateSpread'
+      this.runFetch(API_URL, this.prepareBodyFromState()).then(res => {
+        this.props.onCalculated(res)
+      })
     })
   }
 
