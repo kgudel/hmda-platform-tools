@@ -49,6 +49,7 @@ const validatedInput = {
   },
   loanTerm: {
     validate(term) {
+      if (asNumber(term) === 1) return 'tempfix'
       return isNaN(asNumber(term)) || term > 50 || term < 1
     },
     text: 'Loan term must be a number between 1 and 50.'
@@ -261,7 +262,9 @@ class Form extends Component {
           <label htmlFor="loanTerm">Loan Term</label>
           {loanTermError ? (
             <h4 className="usa-input-error-message" role="alert">
-              {validatedInput.loanTerm.text}
+              {loanTermError === 'tempfix'
+                ? "We're sorry, the rate spread on entries with a loan term of 1 year cannot be calculated right now. We are working on an update to resolve the issue."
+                : validatedInput.loanTerm.text}
             </h4>
           ) : null}
           <input
