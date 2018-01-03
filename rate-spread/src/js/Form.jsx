@@ -120,7 +120,7 @@ class Form extends Component {
     })
     this.setState(
       {
-        validationErrors: newState
+        errors: newState
       },
       cb
     )
@@ -134,7 +134,7 @@ class Form extends Component {
     event.preventDefault()
 
     this.validateAllInput(() => {
-      const errs = this.state.validationErrors
+      const errs = this.state.errors
       if (errs.rateSetDate || errs.APR || errs.loanTerm) return
 
       const API_URL = 'https://ffiec-api.cfpb.gov/public/rateSpread'
